@@ -1,0 +1,32 @@
+# Скомпилированные файлы Python
+*.pyc
+__pycache__/
+*~$
+
+# Виртуальное окружение
+venv/
+env/
+.venv/
+
+# База данных SQLite (если используется)
+db.sqlite3
+sqlite.db
+*.sqlite3
+
+# Файлы локальных настроек (могут содержать секреты, например SECRET_KEY)
+local_settings.py
+.env
+
+# Медиа и статические файлы (которые собираются командой collectstatic при деплое)
+/media
+/static
+
+# Логи и файлы перевода
+*.log
+*.pot
+
+# Файлы IDE (например, PyCharm, VS Code)
+.idea/
+.vscode/
+.DS_Store # macOS system file
+Thumbs.db # Windows system file
