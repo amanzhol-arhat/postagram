@@ -5,6 +5,7 @@ from django.contrib.auth.models import update_last_login
 from core.user.serializers import UserSerializer
 
 
+
 class LoginSerializer(TokenObtainPairSerializer):
     def validate(self, attrs):
         data = super().validate(attrs)
@@ -19,3 +20,11 @@ class LoginSerializer(TokenObtainPairSerializer):
             update_last_login(None, self.user)
 
         return data
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        token['is_staff'] = user.is_staff
+        token['is_superuser'] = user.is_superuser
+        return token
