@@ -167,3 +167,35 @@ DICEBEAR = {
     'DEFAULT_SEED': 'default-avatar',
     'API_BASE': 'https://api.dicebear.com/9.x',
 }
+
+#Logging
+LOG_FILE_PATH = os.path.join(BASE_DIR, 'django_debug.log')
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'ERROR', #ОШИБКИ И КРИТ СБОИ
+            'class': 'logging.FileHandler',
+            'filename': LOG_FILE_PATH,
+            'formatter': 'verbose',
+        },
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
