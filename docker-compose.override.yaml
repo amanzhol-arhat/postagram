@@ -1,0 +1,15 @@
+services:
+  api:
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/app  # Твой код из PyCharm синхронизируется с контейнером
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - "8000:8000" # Открываем 8000 порт, чтобы можно было стучаться в обход Nginx
+
+  nginx:
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - static_volume:/app/static:ro
+      - media_volume:/app/media:ro

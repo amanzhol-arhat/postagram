@@ -13,3 +13,14 @@ data_user = {
 @pytest.fixture
 def user(db) -> User:
     return User.objects.create_user(**data_user)
+
+@pytest.fixture
+def another_user(db) -> User:
+    data_user = {
+        "username": "another_user",
+        "email": "another@gmail.com",
+        "first_name": "Another",
+        "last_name": "User",
+        "password": "another_password"
+    }
+    return User.objects.create_user(**data_user)
