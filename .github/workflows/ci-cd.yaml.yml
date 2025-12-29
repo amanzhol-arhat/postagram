@@ -1,0 +1,46 @@
+name: Build, Test and Deploy Arhatogram
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Build Docker for tests
+        run: |
+          docker-compose build api
+
+      - name: Run Pytest
+        run: |
+          docker-compose run --rm api pytest
+
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy to AWS via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.AWS_HOST }}
+          username: ${{ secrets.AWS_USER }}
+          key: ${{ secrets.AWS_SSH_KEY }}
+          script: |
+            cd ~/django-react  
+            git pull origin main
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+            docker-compose exec -T api python manage.py migrate --no-input
+            docker-compose exec -T api python manage.py collectstatic --noinput
