@@ -1,12 +1,15 @@
+from rest_framework import status
+from rest_framework.decorators import action
+from rest_framework.response import Response
+
 from core.abstract import AbstractViewSet
 from core.auth.permission import UserPermission
-
-from .models import User
-from .serializers import UserSerializer
+from core.user.models import User, UserFollow
+from core.user.serializers import UserSerializer, UserSummarySerializer
 
 
 class UserViewSet(AbstractViewSet):
-    http_method_names = ["patch", "get"]
+    http_method_names = ["patch", "get", "post"]
     permission_classes = [UserPermission]
     serializer_class = UserSerializer
 
@@ -19,3 +22,65 @@ class UserViewSet(AbstractViewSet):
         obj = User.objects.get_object_by_public_id(self.kwargs["pk"])
         self.check_object_permissions(self.request, obj)
         return obj
+
+    @action(detail=True, methods=["post"])
+    def follow(self, request, *args, **kwargs):
+        user_to_follow = self.get_object()
+        current_user = request.user
+
+        if user_to_follow == current_user:
+            return Response(
+                {"detail": "You cannot follow yourself."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        follow_instance = UserFollow.objects.filter(
+            user=current_user, followed=user_to_follow
+        )
+
+        if follow_instance.exists():
+            follow_instance.delete()
+            return Response(
+                {"detail": "Unfollowed", "is_following": False},
+                status=status.HTTP_200_OK,
+            )
+        else:
+            UserFollow.objects.create(user=current_user, followed=user_to_follow)
+            return Response(
+                {"detail": "Followed", "is_following": True},
+                status=status.HTTP_201_CREATED,
+            )
+
+    @action(detail=True, methods=["get"])
+    def followers(self, request, *args, **kwargs):
+        user = self.get_object()
+        followers_qs = User.objects.filter(following__followed=user)
+
+        page = self.paginate_queryset(followers_qs)
+        if page is not None:
+            serializer = UserSummarySerializer(
+                page, many=True, context={"request": request}
+            )
+            return self.get_paginated_response(serializer.data)
+
+        serializer = UserSummarySerializer(
+            followers_qs, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["get"])
+    def following(self, request, *args, **kwargs):
+        user = self.get_object()
+        following_qs = User.objects.filter(followers__user=user)
+
+        page = self.paginate_queryset(following_qs)
+        if page is not None:
+            serializer = UserSummarySerializer(
+                page, many=True, context={"request": request}
+            )
+            return self.get_paginated_response(serializer.data)
+
+        serializer = UserSummarySerializer(
+            following_qs, many=True, context={"request": request}
+        )
+        return Response(serializer.data)
