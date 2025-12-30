@@ -1,0 +1,20 @@
+[flake8]
+max-line-length = 88
+extend-ignore = E203, W503
+exclude =
+    .git,
+    __pycache__,
+    build,
+    dist,
+    migrations,
+    venv,
+    .venv
+
+per-file-ignores =
+    # Разрешаем неиспользуемые импорты в __init__ (нужно для чистых импортов)
+    **/__init__.py: F401
+    # Разрешаем магию в настройках
+    CoreRoot/settings/*.py: F403, F405
+    # Разрешаем фикстуры в тестах (убирает F811)
+    **/tests/*.py: F811, F401
+    **/test_*.py: F811, F401

@@ -13,4 +13,3 @@ function render(ui, renderOptions = {}) {
 
 export * from '@testing-library/react';
 export { render };
-
