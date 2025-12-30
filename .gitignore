@@ -28,6 +28,7 @@ wheels/
 .installed.cfg
 *.egg
 uploads/
+db.sqlite3
 
 # --- Тестирование и отчеты ---
 htmlcov/
@@ -41,6 +42,7 @@ coverage.xml
 *.py,cover
 .coverage
 .coverage.*
+django_debug.log
 
 # --- Docker (если используешь) ---
 .dockerignore

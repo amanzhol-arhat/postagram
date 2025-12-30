@@ -3,6 +3,7 @@ from django.contrib.auth.models import (
     BaseUserManager,
     PermissionsMixin,
 )
+from django.core.exceptions import ValidationError
 from django.db import models
 
 from core.abstract import AbstractManager, AbstractModel
@@ -14,7 +15,6 @@ def user_directory_path(instance, _filename):
 
 
 class UserManager(BaseUserManager, AbstractManager):
-
     def create_user(self, username, email, password=None, **kwargs):
         if username is None:
             raise TypeError("Users must have a username")
@@ -22,12 +22,12 @@ class UserManager(BaseUserManager, AbstractManager):
             raise TypeError("Users must have a email")
         if password is None:
             raise TypeError("Users must have a password")
+
         user = self.model(
             username=username, email=self.normalize_email(email), **kwargs
         )
         user.set_password(password)
         user.save(using=self._db)
-
         return user
 
     def create_superuser(self, username, email, password, **kwargs):
@@ -42,7 +42,6 @@ class UserManager(BaseUserManager, AbstractManager):
         user.is_superuser = True
         user.is_staff = True
         user.save(using=self._db)
-
         return user
 
 
@@ -54,27 +53,20 @@ class User(AbstractModel, AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+
     bio = models.CharField(max_length=300, null=True, blank=True)
     avatar = models.ImageField(null=True, blank=True, upload_to=user_directory_path)
-    post_liked = models.ManyToManyField("core_post.Post", related_name="liked_by")
-    comments_liked = models.ManyToManyField(
-        "core_comment.Comment", related_name="commented_by"
-    )  # noqa: E501
     avatar_seed = models.CharField(
         max_length=100,
         blank=True,
         default="",
         help_text="DiceBear seed для стиля 'dylan'",
-    )  # noqa: E501
+    )
 
-    def like(self, post):
-        return self.post_liked.add(post)
-
-    def remove_like(self, post):
-        return self.post_liked.remove(post)
-
-    def has_liked(self, post):
-        return self.post_liked.filter(pk=post.pk).exists()
+    posts_liked = models.ManyToManyField("core_post.Post", related_name="liked_by")
+    comments_liked = models.ManyToManyField(
+        "core_comment.Comment", related_name="commented_by"
+    )
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["username"]
@@ -111,3 +103,38 @@ class User(AbstractModel, AbstractBaseUser, PermissionsMixin):
     def has_liked_comment(self, comment):
         """Return True if the user has liked a `comment`; else False"""
         return self.comments_liked.filter(pk=comment.pk).exists()
+
+
+class UserFollow(models.Model):
+    user = models.ForeignKey(
+        "core_user.User",
+        on_delete=models.CASCADE,
+        related_name="following",
+        help_text="Who is subscribing",
+    )
+    followed = models.ForeignKey(
+        "core_user.User",
+        related_name="followers",
+        on_delete=models.CASCADE,
+        help_text="Who is being subscribed to",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("user", "followed")
+        ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["user", "followed"]),
+            models.Index(fields=["followed"]),
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} follows {self.followed.username}"
+
+    def clean(self):
+        if self.user == self.followed:
+            raise ValidationError("You cannot follow yourself.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
