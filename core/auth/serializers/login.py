@@ -1,9 +1,8 @@
+from django.contrib.auth.models import update_last_login
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.settings import api_settings
-from django.contrib.auth.models import update_last_login
 
 from core.user.serializers import UserSerializer
-
 
 
 class LoginSerializer(TokenObtainPairSerializer):
@@ -12,9 +11,9 @@ class LoginSerializer(TokenObtainPairSerializer):
 
         refresh = self.get_token(self.user)
 
-        data['user'] = UserSerializer(self.user, context=self.context).data
-        data['refresh'] = str(refresh)
-        data['access'] = str(refresh.access_token)
+        data["user"] = UserSerializer(self.user, context=self.context).data
+        data["refresh"] = str(refresh)
+        data["access"] = str(refresh.access_token)
 
         if api_settings.UPDATE_LAST_LOGIN:
             update_last_login(None, self.user)
@@ -25,6 +24,6 @@ class LoginSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
 
-        token['is_staff'] = user.is_staff
-        token['is_superuser'] = user.is_superuser
+        token["is_staff"] = user.is_staff
+        token["is_superuser"] = user.is_superuser
         return token

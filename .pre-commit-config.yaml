@@ -1,0 +1,25 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace      # Удаляет лишние пробелы в концах строк
+      - id: end-of-file-fixer        # Гарантирует пустую строку в конце файла
+      - id: check-yaml               # Проверяет синтаксис YAML-файлов
+      - id: check-added-large-files  # Не дает случайно залить файл на 50Мб
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: ["--profile", "black"] # Сортирует импорты так, чтобы они не спорили с Black
+
+  - repo: https://github.com/psf/black
+    rev: 24.10.0
+    hooks:
+      - id: black                    # Магически форматирует код (кавычки, отступы)
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8                   # Ищет логические ошибки и неиспользуемые переменные
+        args: ["--max-line-length=88", "--extend-ignore=E203"]

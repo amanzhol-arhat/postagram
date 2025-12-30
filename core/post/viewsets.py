@@ -1,26 +1,26 @@
-from rest_framework.response import Response
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import action
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.response import Response
 
 from core.abstract.viewsets import AbstractViewSet
+from core.auth.permission import UserPermission
 from core.post.models import Post
 from core.post.serializers import PostSerializer
-from core.auth.permission import  UserPermission
 
 
 class PostViewSet(AbstractViewSet):
-    http_method_names = ('post', 'get', 'put', 'delete', 'patch')
-    permission_classes = (UserPermission, )
+    http_method_names = ("post", "get", "put", "delete", "patch")
+    permission_classes = (UserPermission,)
     serializer_class = PostSerializer
     filter_backends = [DjangoFilterBackend]
-    filterset_fields = ['author__public_id']
+    filterset_fields = ["author__public_id"]
 
     def get_queryset(self):
-        return Post.objects.all().order_by('-created_at')
+        return Post.objects.all().order_by("-created_at")
 
     def get_object(self):
-        obj = Post.objects.get_object_by_public_id(self.kwargs['pk'])
+        obj = Post.objects.get_object_by_public_id(self.kwargs["pk"])
 
         self.check_object_permissions(self.request, obj)
 
@@ -32,7 +32,7 @@ class PostViewSet(AbstractViewSet):
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    @action(methods=['post'], detail=True)
+    @action(methods=["post"], detail=True)
     def like(self, request, *args, **kwargs):
         post = self.get_object()
         user = self.request.user
@@ -41,7 +41,7 @@ class PostViewSet(AbstractViewSet):
         serializer = self.serializer_class(post)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @action(methods=['post'], detail=True)
+    @action(methods=["post"], detail=True)
     def remove_like(self, request, *args, **kwargs):
         post = self.get_object()
         user = self.request.user

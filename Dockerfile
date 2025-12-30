@@ -26,4 +26,3 @@ RUN pip install --no-cache-dir -r req.txt
 
 
 COPY . .
-

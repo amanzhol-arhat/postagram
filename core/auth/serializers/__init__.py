@@ -1,2 +1,2 @@
-from .register import RegisterSerializer
-from .login import LoginSerializer
+from .login import LoginSerializer  # noqa: F401
+from .register import RegisterSerializer  # noqa: F401

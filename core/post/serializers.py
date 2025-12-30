@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-
 from core.abstract.serializers import AbstractSerializer
 from core.post.models import Post
 from core.user.models import User
@@ -9,7 +8,9 @@ from core.user.serializers import UserSerializer
 
 
 class PostSerializer(AbstractSerializer):
-    author = serializers.SlugRelatedField(queryset=User.objects.all(), slug_field='public_id')
+    author = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field="public_id"
+    )
     liked = serializers.SerializerMethodField()
     likes_count = serializers.SerializerMethodField()
     comments_count = serializers.SerializerMethodField()
@@ -18,7 +19,7 @@ class PostSerializer(AbstractSerializer):
         return instance.comment_set.count()
 
     def get_liked(self, instance):
-        request = self.context.get('request', None)
+        request = self.context.get("request", None)
         if request is None or request.user.is_anonymous:
             return False
         return request.user.has_liked(instance)
@@ -33,18 +34,28 @@ class PostSerializer(AbstractSerializer):
         return rep
 
     def validate_author(self, value):
-        if self.context['request'].user != value:
+        if self.context["request"].user != value:
             raise ValidationError("You can't create a post for another user")
         return value
 
     def update(self, instance, validated_data):
         if not instance.edited:
-            validated_data['edited'] = True
+            validated_data["edited"] = True
 
         instance = super().update(instance, validated_data)
         return instance
 
     class Meta:
         model = Post
-        fields = ['id', 'author', 'body', 'edited', 'liked', 'likes_count', 'created_at', 'updated_at', 'comments_count']
-        read_only_fields = ['edited']
+        fields = [
+            "id",
+            "author",
+            "body",
+            "edited",
+            "liked",
+            "likes_count",
+            "created_at",
+            "updated_at",
+            "comments_count",
+        ]
+        read_only_fields = ["edited"]

@@ -6,14 +6,16 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core_comment', '0001_initial'),
-        ('core_user', '0003_user_bio'),
+        ("core_comment", "0001_initial"),
+        ("core_user", "0003_user_bio"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='user',
-            name='comments_liked',
-            field=models.ManyToManyField(related_name='commented_by', to='core_comment.comment'),
+            model_name="user",
+            name="comments_liked",
+            field=models.ManyToManyField(
+                related_name="commented_by", to="core_comment.comment"
+            ),
         ),
     ]

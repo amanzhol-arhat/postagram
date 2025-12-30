@@ -1,4 +1,5 @@
 from django.db import models
+
 from core.abstract.models import AbstractManager, AbstractModel
 
 
@@ -7,14 +8,14 @@ class PostManager(AbstractManager):
 
 
 class Post(AbstractModel):
-    author = models.ForeignKey(to='core_user.User', on_delete=models.CASCADE)
+    author = models.ForeignKey(to="core_user.User", on_delete=models.CASCADE)
     body = models.TextField()
     edited = models.BooleanField(default=False)
 
     objects = PostManager()
 
     def __str__(self):
-        return f'{self.author.name}'
+        return f"{self.author.name}"
 
     class Meta:
         db_table = "сore_post"
