@@ -25,7 +25,7 @@ class CommentSerializer(AbstractSerializer):
         return request.user.has_liked_comment(instance)
 
     def get_likes_count(self, instance):
-        return instance.commented_by.count()
+        return instance.liked_by.count()
 
     def validate_author(self, value):
         if self.context["request"].user != value:

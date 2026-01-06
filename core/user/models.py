@@ -60,12 +60,12 @@ class User(AbstractModel, AbstractBaseUser, PermissionsMixin):
         max_length=100,
         blank=True,
         default="",
-        help_text="DiceBear seed для стиля 'dylan'",
+        help_text="DiceBear seed for style 'dylan'",
     )
 
     posts_liked = models.ManyToManyField("core_post.Post", related_name="liked_by")
     comments_liked = models.ManyToManyField(
-        "core_comment.Comment", related_name="commented_by"
+        "core_comment.Comment", related_name="liked_by"
     )
 
     USERNAME_FIELD = "email"

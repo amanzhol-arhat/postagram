@@ -43,7 +43,7 @@ class CommentViewSet(AbstractViewSet):
 
         user.like_comment(comment)
 
-        serializer = self.serializer_class(comment)
+        serializer = self.serializer_class(comment, context={"request": request})
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -54,6 +54,6 @@ class CommentViewSet(AbstractViewSet):
 
         user.remove_like_comment(comment)
 
-        serializer = self.serializer_class(comment)
+        serializer = self.serializer_class(comment, context={"request": request})
 
         return Response(serializer.data, status=status.HTTP_200_OK)
