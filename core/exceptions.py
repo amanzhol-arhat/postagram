@@ -19,7 +19,7 @@ def custom_exception_handler(exc, context):
             {
                 "status": "error",
                 "code": "server_error",
-                "message": "На сервере произошла ошибка. Мы уже разбираемся.",
+                "message": "An internal server error occurred. Our team is working to resolve it.",  # noqa: E501
                 "details": str(exc) if settings.DEBUG else None,
             },
             status=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -32,7 +32,7 @@ def custom_exception_handler(exc, context):
     custom_response_data = {
         "status": "error",
         "code": response.status_text.lower().replace(" ", "_"),
-        "message": "Ошибка выполнения запроса",
+        "message": "Request execution failed.",
         "details": response.data,
     }
 

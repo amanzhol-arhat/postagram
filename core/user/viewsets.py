@@ -42,12 +42,11 @@ class UserViewSet(AbstractViewSet):
         return Response(data)
 
     def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        cache_key = f"user:{instance.public_id}"
+        cache.delete(cache_key)
         response = super().update(request, *args, **kwargs)
-
-        if response.status_code == 200:
-            instance = response.data
-            cache_key = f"user:{instance['public_id']}"
-            cache.delete(cache_key)
+        cache.delete(cache_key)
 
         return response
 
@@ -68,12 +67,18 @@ class UserViewSet(AbstractViewSet):
 
         if follow_instance.exists():
             follow_instance.delete()
+            # Clear cache
+            cache.delete(f"user:{user_to_follow.public_id}")
+            cache.delete(f"user:{current_user.public_id}")
             return Response(
                 {"detail": "Unfollowed", "is_following": False},
                 status=status.HTTP_200_OK,
             )
         else:
             UserFollow.objects.create(user=current_user, followed=user_to_follow)
+            # Clear cache
+            cache.delete(f"user:{user_to_follow.public_id}")
+            cache.delete(f"user:{current_user.public_id}")
             return Response(
                 {"detail": "Followed", "is_following": True},
                 status=status.HTTP_201_CREATED,

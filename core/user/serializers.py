@@ -38,6 +38,7 @@ class UserSerializer(AbstractSerializer):
     followers_count = serializers.SerializerMethodField()
     following_count = serializers.SerializerMethodField()
     is_following = serializers.SerializerMethodField()
+    posts_count = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -58,6 +59,7 @@ class UserSerializer(AbstractSerializer):
             "followers_count",
             "following_count",
             "is_following",
+            "posts_count",
         ]
         read_only_fields = ["is_active", "is_superuser"]
 
@@ -69,16 +71,21 @@ class UserSerializer(AbstractSerializer):
         return get_dicebear_url(seed=seed)
 
     def get_followers_count(self, obj):
-        return obj.followers.count()
+        return UserFollow.objects.filter(followed=obj).count()
 
     def get_following_count(self, obj):
-        return obj.following.count()
+        return UserFollow.objects.filter(user=obj).count()
 
     def get_is_following(self, obj):
         request = self.context.get("request")
         if request and request.user.is_authenticated:
             return UserFollow.objects.filter(user=request.user, followed=obj).exists()
         return False
+
+    def get_posts_count(self, obj):
+        from core.post.models import Post
+
+        return Post.objects.filter(author=obj).count()
 
 
 class UserFollowSerializer(AbstractSerializer):
